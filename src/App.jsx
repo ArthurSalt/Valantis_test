@@ -7,6 +7,7 @@ import './App.css';
 function App() {
 
   const [items, setItems] = useState([])
+  const [ids, setIds] = useState([])
 
   useEffect(() => {
     const BASE_URL = 'http://api.valantis.store:40000/';
@@ -47,6 +48,7 @@ function App() {
 
     const request = async () => {
       const ids = await getIds()
+      setIds(ids)
       const items = await getItems(ids)
       setItems(items)
     }
@@ -56,11 +58,26 @@ function App() {
   }, [])    
 
   return (
-    <>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Brand</th>
+        </tr>
+      </thead>
+      <tbody>
       {items && items.map(item => (
-        <li key={Math.random()}>{item.product}</li>
+        <tr key={Math.random()}>
+          <td>{item.id}</td>
+          <td>{item.product}</td>
+          <td>{item.price}</td>
+          <td>{item.brand}</td>
+        </tr>
       ))}
-    </>
+      </tbody>
+    </table>
   );
 }
 
