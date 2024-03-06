@@ -10,7 +10,13 @@ function App() {
 
   const [items, setItems] = useState([])
   const [ids, setIds] = useState([])
-  const [currentPage, setCurrentPage] = useState(1);
+  const [filterValue, setFilterValue] = useState('');
+  const [offset, setOffset] = useState('');
+  const [filterType, setFilterType] = useState('product');
+
+  // const handleChange = (event) => {
+  //   setFilter(event.target.value);
+  // };
 
   const BASE_URL = 'http://api.valantis.store:40000/';
 
@@ -48,22 +54,50 @@ function App() {
     return res.data.result
   }
 
-  const request = async (offset) => {
+  const getFilteredList = async (filterType, filterValue) => {
+    const res = await axios
+    .post(
+      BASE_URL,
+      JSON.stringify({
+        "action": "filter",
+        "params": {[filterType]: filterValue,}      
+      }),
+      { headers },
+    )
+    return res.data.result
+  }
+
+  const requestItems = async (offset) => {
     const ids = await getIds(offset)
+    setIds(ids)
+    const items = await getItems(ids)
+    setItems(items)
+  }
+  const requestFilteredItems = async (filterType, filterValue) => {
+    const ids = await getFilteredList(filterType, filterValue)
     setIds(ids)
     const items = await getItems(ids)
     setItems(items)
   }
 
   useEffect(() => {
-    request()   
+    requestItems()   
   }, [])    
 
-  const handlePageChange = (page) => {
+  const handlePageChange = async (page) => {
     const offset = (page - 1) * 50
-    request(offset)
-    setCurrentPage(page);
+    setOffset(offset)
+    await requestItems(offset)
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if(filterType === 'product') {
+      await requestFilteredItems(filterType, filterValue)
+    } else {
+      await requestFilteredItems(filterType, Number(filterValue))
+    }
+  }
 
   return (
     <section>
@@ -72,6 +106,23 @@ function App() {
         itemsPerPage={50} 
         onPageChange={handlePageChange}
       />
+
+      <form onSubmit={handleSubmit} className='input_group'>
+        <select name="select" id="select" 
+          onChange={(e) => {setFilterType(e.target.value)}}
+        >
+          <option defaultValue value="product">name</option>
+          <option value="price">price</option>
+          <option value="brand">brand</option>
+        </select>
+        <input 
+          value={filterValue} 
+          type={filterType === 'price' ? 'number' : 'text'} 
+          onChange={(e) => setFilterValue(e.target.value)}
+          />
+        <button type='submit'>Search</button>
+      </form>
+
       <table>
         <thead>
           <tr>
