@@ -3,7 +3,6 @@ import { Pagination } from './components/Pagination';
 import axios from 'axios';
 import md5 from 'md5';
 
-import './reset.css'
 import './App.css';
 
 function App() {
@@ -92,11 +91,7 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if(filterType === 'product') {
-      await requestFilteredItems(filterType, filterValue)
-    } else {
-      await requestFilteredItems(filterType, Number(filterValue))
-    }
+    await requestFilteredItems(filterType, filterValue)
   }
 
   return (
