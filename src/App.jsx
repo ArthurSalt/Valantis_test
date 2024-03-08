@@ -1,108 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { Pagination } from './components/Pagination';
-import axios from 'axios';
-import md5 from 'md5';
+import { requestItems, requestFilteredItems, getTotalCount } from './api/items_api';
 
 import './App.css';
 
 function App() {
-
-  const [items, setItems] = useState([])
-  const [ids, setIds] = useState([])
+  const [items, setItems] = useState('')
+  const [totalItems, setTotalItems] = useState()
+  const [filtered, setFiltered] = useState('')
   const [filterValue, setFilterValue] = useState('');
-  const [offset, setOffset] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState('product');
-
-  // const handleChange = (event) => {
-  //   setFilter(event.target.value);
-  // };
-
-  const BASE_URL = 'http://api.valantis.store:40000/';
-
-  const dateISO = new Date().toISOString().split('T');
-  const date = dateISO[0].split('-').join('');
-
-  const headers = {
-    "Content-Type":"application/json",
-    'X-Auth': md5(`Valantis_${date}`),  
-  };
-
-  const getIds = async (offset = 0) => {
-    const res = await axios
-      .post(
-        BASE_URL,
-        JSON.stringify({
-          "action": "get_ids",
-          "params": {"offset": offset, "limit": 50},   
-        }),
-        { headers },
-      )
-      return res.data.result
-  }
+  console.log(currentPage)
   
-  const getItems = async (ids) => {
-    const res = await axios
-    .post(
-      BASE_URL,
-      JSON.stringify({
-        "action": "get_items",
-        "params": {"ids": [...ids]}      
-      }),
-      { headers },
-    )
-    return res.data.result
-  }
-
-  const getFilteredList = async (filterType, filterValue) => {
-    const res = await axios
-    .post(
-      BASE_URL,
-      JSON.stringify({
-        "action": "filter",
-        "params": {[filterType]: filterValue,}      
-      }),
-      { headers },
-    )
-    return res.data.result
-  }
-
-  const requestItems = async (offset) => {
-    const ids = await getIds(offset)
-    setIds(ids)
-    const items = await getItems(ids)
-    setItems(items)
-  }
-  const requestFilteredItems = async (filterType, filterValue) => {
-    const ids = await getFilteredList(filterType, filterValue)
-    setIds(ids)
-    const items = await getItems(ids)
-    setItems(items)
-  }
 
   useEffect(() => {
-    requestItems()   
+    const onMount = async () => {
+      const items = await requestItems()
+      setItems(items)
+      const totalCount = await getTotalCount()
+      setTotalItems(totalCount) 
+    }
+    onMount()
   }, [])    
 
   const handlePageChange = async (page) => {
     const offset = (page - 1) * 50
-    setOffset(offset)
-    await requestItems(offset)
-  };
+    if(filtered) {
+      const lastItem = offset + 50;
+      const currentChunk = filtered.slice(offset, lastItem);
+      setItems(currentChunk)
+      setCurrentPage(page)
+    } else {
+      const items = await requestItems(offset)
+      setItems(items)
+      setCurrentPage(page)
+    }
+  };  
 
-  const handleSubmit = async (e) => {
+  const handleSubmitFilter = async (e) => {
     e.preventDefault()
-    await requestFilteredItems(filterType, filterValue)
+    if(filterType === 'price') {
+      const items = await requestFilteredItems(filterType, Number(filterValue))
+      setFiltered(items)
+      setTotalItems(items.length)
+      setCurrentPage(1)
+    } else {
+      const items = await requestFilteredItems(filterType, filterValue)
+      setFiltered(items)
+      setTotalItems(items.length)
+      setCurrentPage(1)
+    }
   }
+  
+  const removeFilter = async () => {
+    setFiltered('')
+    const items = await requestItems()
+    setItems(items)
+    const totalCount = await getTotalCount()
+    setTotalItems(totalCount)
+    setFilterValue('')
+    setCurrentPage(1)
+}
 
   return (
     <section>
       <Pagination
-        totalItems={8004} 
+        totalItems={totalItems} 
         itemsPerPage={50} 
-        onPageChange={handlePageChange}
+        handlePageChange={handlePageChange}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
 
-      <form onSubmit={handleSubmit} className='input_group'>
+      <form onSubmit={handleSubmitFilter} className='input_group'>
         <select name="select" id="select" 
           onChange={(e) => {setFilterType(e.target.value)}}
         >
@@ -116,6 +87,7 @@ function App() {
           onChange={(e) => setFilterValue(e.target.value)}
           />
         <button type='submit'>Search</button>
+        <button type='reset' onClick={() => removeFilter()}>Reset</button>
       </form>
 
       <table>
@@ -128,14 +100,16 @@ function App() {
           </tr>
         </thead>
         <tbody>
-        {items && items.map(item => (
+        {items ? items.map(item => (
           <tr key={Math.random()}>
             <td>{item.id}</td>
             <td>{item.product}</td>
             <td>{item.price}</td>
             <td>{item.brand}</td>
           </tr>
-        ))}
+        )) : <tr>
+          <td>No Items Found</td>
+          </tr>}
         </tbody>
       </table>
     </section>

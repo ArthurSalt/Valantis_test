@@ -1,16 +1,14 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
 
 import './Pagination.css';
 
-export const Pagination = ({ totalItems, itemsPerPage, onPageChange }) => {
+export const Pagination = ({ totalItems, itemsPerPage, handlePageChange, currentPage}) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    onPageChange(newPage);
-  };
+  // const handlePageChange = (newPage) => {
+  //   setCurrentPage(newPage);
+  //   onPageChange(newPage);
+  // };
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
