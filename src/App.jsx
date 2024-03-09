@@ -1,4 +1,4 @@
-import { useState, useEffect} from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { Pagination } from './components/Pagination';
 import { requestItems, requestFilteredItems, getTotalCount } from './api/items_api';
 
@@ -22,48 +22,60 @@ function App() {
     onMount()
   }, [])    
 
-  const handlePageChange = async (page) => {
-    const offset = (page - 1) * 50
-    // Client Side Pagination for filtered items
-    if(filtered) {
-      const lastItem = offset + 50;
-      const currentChunk = filtered.slice(offset, lastItem);
-      setItems(currentChunk)
-      setCurrentPage(page)
-    } else {
-      // Pagination via Valantis API
-      const items = await requestItems(offset)
-      setItems(items)
-      setCurrentPage(page)
+  const handlePageChange = useCallback(async (page) => {
+    try {
+      const offset = (page - 1) * 50
+      // Client Side Pagination for filtered items
+      if(filtered) {
+        const lastItem = offset + 50;
+        const currentChunk = filtered.slice(offset, lastItem);
+        setItems(currentChunk)
+        setCurrentPage(page)
+      } else {
+        // Pagination via Valantis API
+        const items = await requestItems(offset)
+        setItems(items)
+        setCurrentPage(page)
+      }
+    } catch (error) {
+      alert(error.message)
     }
-  };  
+  }, [filtered]);  
 
   useEffect(() => {
     handlePageChange(1)
-  }, [filtered])
+  }, [filtered, handlePageChange])
   
   const handleSubmitFilter = async (e) => {
     e.preventDefault()
-    if(filterType === 'price') {
-      const items = await requestFilteredItems(filterType, Number(filterValue))
-      setTotalItems(items.length)
-      setFiltered(items)
-    } else {
-      const items = await requestFilteredItems(filterType, filterValue)
-      setTotalItems(items.length)
-      setFiltered(items)
+    try {
+      if(filterType === 'price') {
+        const items = await requestFilteredItems(filterType, Number(filterValue))
+        setTotalItems(items.length)
+        setFiltered(items)
+      } else {
+        const items = await requestFilteredItems(filterType, filterValue)
+        setTotalItems(items.length)
+        setFiltered(items)
+      }
+    } catch (error) {
+      alert(error.message)
     }
   }
   
   const removeFilter = async () => {
-    setFiltered('')
-    const items = await requestItems()
-    setItems(items)
-    const totalCount = await getTotalCount()
-    setTotalItems(totalCount)
-    setFilterValue('')
-    setFilterType('product')
-    setCurrentPage(1)
+    try {
+      setFiltered('')
+      const items = await requestItems()
+      setItems(items)
+      const totalCount = await getTotalCount()
+      setTotalItems(totalCount)
+      setFilterValue('')
+      setFilterType('product')
+      setCurrentPage(1)
+    } catch (error) {
+      alert(error.message)
+    }
 }
 
   return (
