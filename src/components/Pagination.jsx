@@ -5,11 +5,6 @@ import './Pagination.css';
 export const Pagination = ({ totalItems, itemsPerPage, handlePageChange, currentPage}) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // const handlePageChange = (newPage) => {
-  //   setCurrentPage(newPage);
-  //   onPageChange(newPage);
-  // };
-
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {

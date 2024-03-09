@@ -6,13 +6,11 @@ import './App.css';
 
 function App() {
   const [items, setItems] = useState('')
-  const [totalItems, setTotalItems] = useState()
-  const [filtered, setFiltered] = useState('')
+  const [totalItems, setTotalItems] = useState(0)
+  const [filtered, setFiltered] = useState()
   const [filterValue, setFilterValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [filterType, setFilterType] = useState('product');
-  console.log(currentPage)
-  
+  const [filterType, setFilterType] = useState('product');  
 
   useEffect(() => {
     const onMount = async () => {
@@ -26,30 +24,34 @@ function App() {
 
   const handlePageChange = async (page) => {
     const offset = (page - 1) * 50
+    // Client Side Pagination for filtered items
     if(filtered) {
       const lastItem = offset + 50;
       const currentChunk = filtered.slice(offset, lastItem);
       setItems(currentChunk)
       setCurrentPage(page)
     } else {
+      // Pagination via Valantis API
       const items = await requestItems(offset)
       setItems(items)
       setCurrentPage(page)
     }
   };  
 
+  useEffect(() => {
+    handlePageChange(1)
+  }, [filtered])
+  
   const handleSubmitFilter = async (e) => {
     e.preventDefault()
     if(filterType === 'price') {
       const items = await requestFilteredItems(filterType, Number(filterValue))
-      setFiltered(items)
       setTotalItems(items.length)
-      setCurrentPage(1)
+      setFiltered(items)
     } else {
       const items = await requestFilteredItems(filterType, filterValue)
-      setFiltered(items)
       setTotalItems(items.length)
-      setCurrentPage(1)
+      setFiltered(items)
     }
   }
   
@@ -60,6 +62,7 @@ function App() {
     const totalCount = await getTotalCount()
     setTotalItems(totalCount)
     setFilterValue('')
+    setFilterType('product')
     setCurrentPage(1)
 }
 
@@ -70,7 +73,6 @@ function App() {
         itemsPerPage={50} 
         handlePageChange={handlePageChange}
         currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
       />
 
       <form onSubmit={handleSubmitFilter} className='input_group'>
@@ -87,7 +89,7 @@ function App() {
           onChange={(e) => setFilterValue(e.target.value)}
           />
         <button type='submit'>Search</button>
-        <button type='reset' onClick={() => removeFilter()}>Reset</button>
+        <button type='reset' onClick={() => removeFilter()}>Remove Filter</button>
       </form>
 
       <table>
@@ -100,8 +102,8 @@ function App() {
           </tr>
         </thead>
         <tbody>
-        {items ? items.map(item => (
-          <tr key={Math.random()}>
+        {items.length ? items.map(item => (
+          <tr key={item.id}>
             <td>{item.id}</td>
             <td>{item.product}</td>
             <td>{item.price}</td>

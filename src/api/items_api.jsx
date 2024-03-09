@@ -34,7 +34,13 @@ const getItems = async (ids) => {
     }),
     { headers },
   )
-  return res.data.result
+  const array = res.data.result
+
+  const uniqItems = array.filter((obj, i, arr) => (
+    arr.findIndex((obj2) => (obj2.id === obj.id)) === i
+    ))
+    
+  return uniqItems
 }
 
 const getFilteredList = async (filterType, filterValue) => {
@@ -72,9 +78,5 @@ export const requestItems = async (offset = 0) => {
 export const requestFilteredItems = async (filterType, filterValue) => {
   const ids = await getFilteredList(filterType, filterValue)
   const items = await getItems(ids)
-  // setTotalItems(ids.length)
-  // setFiltered(items)
-  // setItems(items)
-  // handlePageChange(1)
   return items
 }
