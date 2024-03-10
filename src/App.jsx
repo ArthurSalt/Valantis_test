@@ -24,7 +24,7 @@ function App() {
       }
       onMount()
     } catch (error) {
-      alert(error.message)
+      console.error(error.message)
     } finally {
       setIsLoading(false)
     }
@@ -47,7 +47,7 @@ function App() {
         setCurrentPage(page)
       }
     } catch (error) {
-      alert(error.message)
+      console.error(error.message)
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +71,7 @@ function App() {
         setFiltered(items)
       }
     } catch (error) {
-      alert(error.message)
+      console.error(error.message)
     } finally {
       setIsLoading(false)
     }
@@ -89,7 +89,7 @@ function App() {
       setFilterType('product')
       setCurrentPage(1)
     } catch (error) {
-      alert(error.message)
+      console.error(error.message)
     } finally {
       setIsLoading(false)
     }
