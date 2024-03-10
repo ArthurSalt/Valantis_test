@@ -21,3 +21,28 @@ body {
   min-height: 100vh;
 }
 
+.pagination {
+  display: flex;
+}
+
+form {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+table {
+  margin-bottom: 15px;
+}
+
+th {
+  font-weight: 700;
+  padding-bottom: 10px;
+}
+
+td {
+  padding: 5px;
+  border: 0.5px solid grey;
+}
+
+

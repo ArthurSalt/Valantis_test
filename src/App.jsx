@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback} from 'react';
 import { Pagination } from './components/Pagination';
 import { requestItems, requestFilteredItems, getTotalCount } from './api/items_api';
 
-import './App.css';
-
 function App() {
   const [items, setItems] = useState('')
   const [totalItems, setTotalItems] = useState(0)
@@ -14,9 +12,11 @@ function App() {
 
   useEffect(() => {
     const onMount = async () => {
-      const items = await requestItems()
+      const [items, totalCount] = await Promise.all([
+        requestItems(),
+        getTotalCount()
+      ])
       setItems(items)
-      const totalCount = await getTotalCount()
       setTotalItems(totalCount) 
     }
     onMount()
