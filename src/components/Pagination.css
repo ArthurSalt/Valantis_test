@@ -10,5 +10,5 @@ li {
 }
 
 .active {
-  border: 2px solid red;
+  color: rgb(255, 80, 80);
 }

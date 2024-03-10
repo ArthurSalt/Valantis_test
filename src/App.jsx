@@ -7,23 +7,32 @@ function App() {
   const [totalItems, setTotalItems] = useState(0)
   const [filtered, setFiltered] = useState()
   const [filterValue, setFilterValue] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState('product');  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const onMount = async () => {
-      const [items, totalCount] = await Promise.all([
-        requestItems(),
-        getTotalCount()
-      ])
-      setItems(items)
-      setTotalItems(totalCount) 
+    try {
+      setIsLoading(true)
+      const onMount = async () => {
+        const [items, totalCount] = await Promise.all([
+          requestItems(),
+          getTotalCount()
+        ])
+        setItems(items)
+        setTotalItems(totalCount) 
+      }
+      onMount()
+    } catch (error) {
+      alert(error.message)
+    } finally {
+      setIsLoading(false)
     }
-    onMount()
   }, [])    
 
   const handlePageChange = useCallback(async (page) => {
     try {
+      setIsLoading(true)
       const offset = (page - 1) * 50
       // Client Side Pagination for filtered items
       if(filtered) {
@@ -39,6 +48,8 @@ function App() {
       }
     } catch (error) {
       alert(error.message)
+    } finally {
+      setIsLoading(false)
     }
   }, [filtered]);  
 
@@ -49,6 +60,7 @@ function App() {
   const handleSubmitFilter = async (e) => {
     e.preventDefault()
     try {
+      setIsLoading(true)
       if(filterType === 'price') {
         const items = await requestFilteredItems(filterType, Number(filterValue))
         setTotalItems(items.length)
@@ -60,11 +72,14 @@ function App() {
       }
     } catch (error) {
       alert(error.message)
+    } finally {
+      setIsLoading(false)
     }
   }
   
   const removeFilter = async () => {
     try {
+      setIsLoading(true)
       setFiltered('')
       const items = await requestItems()
       setItems(items)
@@ -75,6 +90,8 @@ function App() {
       setCurrentPage(1)
     } catch (error) {
       alert(error.message)
+    } finally {
+      setIsLoading(false)
     }
 }
 
@@ -102,6 +119,8 @@ function App() {
           />
         <button type='submit'>Search</button>
         <button type='reset' onClick={() => removeFilter()}>Remove Filter</button>
+        <p>Page: {currentPage}</p>
+        {isLoading && <p className='active'>Loading...</p>}
       </form>
 
       <table>

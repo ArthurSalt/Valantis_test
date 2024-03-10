@@ -1,7 +1,7 @@
 import axios from 'axios';
 import md5 from 'md5';
 
-const BASE_URL = 'http://api.valantis.store:40000/';
+const BASE_URL = 'https://api.valantis.store:41000/';
 
 const dateISO = new Date().toISOString().split('T');
 const date = dateISO[0].split('-').join('');
