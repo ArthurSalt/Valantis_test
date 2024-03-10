@@ -117,8 +117,8 @@ function App() {
           type={filterType === 'price' ? 'number' : 'text'} 
           onChange={(e) => setFilterValue(e.target.value)}
           />
-        <button type='submit'>Search</button>
-        <button type='reset' onClick={() => removeFilter()}>Remove Filter</button>
+        <button type='submit' disabled={!filterValue}>Search</button>
+        <button type='reset' disabled={!filtered} onClick={() => removeFilter()}>Remove Filter</button>
         <p>Page: {currentPage}</p>
         {isLoading && <p className='active'>Loading...</p>}
       </form>

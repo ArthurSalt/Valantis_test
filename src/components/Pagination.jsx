@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 
+
 import './Pagination.css';
 
 export const Pagination = ({ totalItems, itemsPerPage, handlePageChange, currentPage}) => {
@@ -25,14 +26,14 @@ export const Pagination = ({ totalItems, itemsPerPage, handlePageChange, current
     <div className="pagination">
       <ul>
         <li onClick={() => handlePageChange(
-          currentPage > 1 ? currentPage - 1 : 1
+          currentPage > 1 ? currentPage - 1 : totalPages
           )}>
           {'<'}
         </li>
         {renderPageNumbers()}
         <li
           onClick={() => handlePageChange(
-            currentPage < totalPages ? currentPage + 1 : totalPages,
+            currentPage < totalPages ? currentPage + 1 : 1,
             )}>
           {'>'}
         </li>
